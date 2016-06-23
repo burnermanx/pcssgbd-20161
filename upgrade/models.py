@@ -1,8 +1,18 @@
 import datetime
 
+from compositefk.fields import CompositeForeignKey
 from django.db import models
 
 # Create your models here.
+from django.db.models import CASCADE
+
+class Endereco(models.Model):
+    logradouro = models.CharField(null=False, max_length=150)
+    numero = models.CharField(null=False, max_length=50)
+    cep = models.IntegerField(null=False)
+
+    def __str__(self):
+        return self.logradouro + " " + self.numero
 
 class Pessoa(models.Model):
     cpf = models.CharField(primary_key=True, null=False, max_length=14)
@@ -10,15 +20,10 @@ class Pessoa(models.Model):
     telefoneResidencial = models.CharField(max_length=50)
     telefoneCelular = models.CharField(max_length=50)
     dataNascimento = models.DateField(null=False)
+    endereco = models.ForeignKey(Endereco, default=0, on_delete=CASCADE, null=False)
 
-
-class Endereco(models.Model):
-    logradouro = models.CharField(null=False, max_length=150)
-    numero = models.CharField(null=False, max_length=50)
-    cep = models.IntegerField(null=False)
-    cpf = models.ForeignKey(Pessoa, on_delete=models.CASCADE, null=False)
-    class Meta:
-        unique_together = (('logradouro', 'numero', 'cep', 'cpf'),)
+    def __str__(self):
+        return self.nome
 
 class Professor(models.Model):
     cpf = models.ForeignKey(Pessoa, on_delete=models.CASCADE, null=False)
@@ -26,14 +31,30 @@ class Professor(models.Model):
     dataContratacao = models.DateField(null=False)
     dataSaida = models.DateField
 
+    def __str__(self):
+        nome = self.cpf.nome
+        matricula = self.matricula
+        return matricula + " - " + nome
+
+
 class Aluno(models.Model):
     matricula = models.CharField(primary_key=True, null=False, max_length=50)
     cpf = models.ForeignKey(Pessoa, on_delete=models.CASCADE, null=False)
+
+    def __str__(self):
+        nome = self.cpf.nome
+        matricula = self.matricula
+
+        return matricula + " - " + nome
 
 class Curso(models.Model):
     id = models.IntegerField(primary_key=True, null=False)
     nome = models.CharField(null=False, max_length=150)
     numModulos = models.IntegerField(null=False)
+
+    def __str__(self):
+        return self.nome
+
 
 class InscricaoCurso(models.Model):
     idCurso = models.ForeignKey(Curso, on_delete=models.CASCADE, null=False)
@@ -48,6 +69,9 @@ class Materia(models.Model):
     cargaHoraria = models.IntegerField(null=False)
     modulo = models.CharField(null=False, max_length=150)
 
+    def __str__(self):
+        return self.nome
+
 class Turma(models.Model):
     id = models.IntegerField(primary_key=True, null= False)
     idMateria = models.ForeignKey(Materia, on_delete=models.CASCADE, null=False)
@@ -61,6 +85,11 @@ class Turma(models.Model):
     matriculaProfessor = models.ForeignKey(Professor, null=False)
     matriculaAluno = models.ManyToManyField(Aluno)
     sala = models.CharField(null=False, max_length=10)
+
+    def __str__(self):
+        nomeMateria = self.idMateria.nome
+
+        return nomeMateria + " - " + id
 
 class Nota(models.Model):
     matriculaAluno = models.ForeignKey(Aluno, null=False)
