@@ -89,7 +89,7 @@ class Turma(models.Model):
     def __str__(self):
         nomeMateria = self.idMateria.nome
 
-        return nomeMateria + " - " + id
+        return nomeMateria + " - " + str(id)
 
 class Nota(models.Model):
     matriculaAluno = models.ForeignKey(Aluno, null=False)
